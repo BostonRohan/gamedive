@@ -1,13 +1,28 @@
 import { Request, Response } from "express";
 import dotenv from "dotenv";
 import getIgdb from "../utils/igdb";
-import { Game } from "../../global.t";
 
 dotenv.config();
 
+type Cover = {
+  id: number;
+  height: number;
+  image_id: string;
+  url: string;
+  width: number;
+};
+
+interface Game {
+  id: number;
+  cover: Cover;
+  name: string;
+  total_rating: number;
+  total_rating_count: number;
+}
+
 const topGames = async (req: Request, res: Response) => {
   try {
-    const games = await getIgdb(
+    let games = await getIgdb(
       "https://api.igdb.com/v4/games",
       "fields name, total_rating, videos, cover, total_rating_count; limit 15; where total_rating != n & total_rating_count > 50; sort total_rating desc;",
       req
@@ -20,7 +35,6 @@ const topGames = async (req: Request, res: Response) => {
       req
     );
 
-    //create universal game type ...
     games.forEach((game: Game, i: number) => (game.cover = covers[i]));
 
     res.send(games);
